@@ -1,8 +1,9 @@
 #define HDR_MAPUNMAP        1
-#define FEEDBACK_MIN        0.96
-#define FEEDBACK_MAX        0.91
-#define COLOR_DEVIATION_ALLOWED_MIN 0.75
-#define COLOR_DEVIATION_ALLOWED_MAX 1.33
+#define RADIUS              0.75
+#define FEEDBACK_MIN        0.94
+#define FEEDBACK_MAX        0.9
+#define COLOR_DEVIATION_ALLOWED_MIN 0.3
+#define COLOR_DEVIATION_ALLOWED_MAX 1.25
 #define SHARPEN             1
 
 #define CLAMP_MAX       65472.0 // HALF_MAX minus one (2 - 2^-9) * 2^15
@@ -191,18 +192,16 @@ float2 UnmapPerChannel(float2 x)
 float2 GetClosestFragment(float2 positionSS)
 {
     float center  = LoadCameraDepth(positionSS);
-    float nw = LoadCameraDepth(positionSS + int2(-2, -2));
-    float ne = LoadCameraDepth(positionSS + int2( 2, -2));
-    float sw = LoadCameraDepth(positionSS + int2(-2,  2));
-    float se = LoadCameraDepth(positionSS + int2( 2,  2));
-
-    float4 neighborhood = float4(nw, ne, sw, se);
+    float nw = LoadCameraDepth(positionSS + float2(-1, -1));
+    float ne = LoadCameraDepth(positionSS + float2( 1, -1));
+    float sw = LoadCameraDepth(positionSS + float2(-1,  1));
+    float se = LoadCameraDepth(positionSS + float2( 1,  1));
 
     float3 closest = float3(0.0, 0.0, center);
-    closest = IS_NEARER_Z(neighborhood.x, closest.z) ? float3(-1.0, -1.0, neighborhood.x) : closest;
-    closest = IS_NEARER_Z(neighborhood.y, closest.z) ? float3( 1.0, -1.0, neighborhood.y) : closest;
-    closest = IS_NEARER_Z(neighborhood.z, closest.z) ? float3(-1.0,  1.0, neighborhood.z) : closest;
-    closest = IS_NEARER_Z(neighborhood.w, closest.z) ? float3( 1.0,  1.0, neighborhood.w) : closest;
+    closest = IS_NEARER_Z(nw, closest.z) ? float3(-1, -1, nw) : closest;
+    closest = IS_NEARER_Z(ne, closest.z) ? float3( 1, -1, ne) : closest;
+    closest = IS_NEARER_Z(sw, closest.z) ? float3(-1,  1, sw) : closest;
+    closest = IS_NEARER_Z(se, closest.z) ? float3( 1,  1, se) : closest;
 
     return positionSS + closest.xy;
 }

@@ -73,7 +73,7 @@ Shader "Hidden/HDRP/TemporalAntialiasing"
         {
         #if HDR_MAPUNMAP
             float3 y = mul(float3x3(0.25, 0.5, 0.25, -0.25, 0.5, -0.25, 0.5, 0, -0.5), x);  // RGB -> YCoCg
-            y.rgb *= rcp(1. + y.r);
+            y.rgb *= rcp(0.25 + y.r);
             return y;
         #else
             return x;
@@ -83,7 +83,7 @@ Shader "Hidden/HDRP/TemporalAntialiasing"
         float3 UnmapColor(float3 x)
         {
         #if HDR_MAPUNMAP
-            x.rgb *= rcp(1. - x.r);
+            x.rgb *= 0.25*rcp(1. - x.r);
             return mul(float3x3(1., -1., 1., 1., 1., 0., 1., -1., -1.), x);  // YCoCg -> RGB
         #else
             return x;
